@@ -1,0 +1,13 @@
+:root {
+  --bg: #F2B6C6;
+  --text: #BF2A70;
+  --muted: #D8F0F2;
+  --accent: #AEEBF2;
+  --extra: #000;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
