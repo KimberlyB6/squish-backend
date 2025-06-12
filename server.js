@@ -1,10 +1,22 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-
 app.use(express.static("public"));
 app.use(express.json());
 app.use(cors());
+const multer = require("multer");
+const Joi = require("joi");
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "./public/images/");
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname);
+    },
+});
+
+const upload = multer({ storage: storage });
 
 
 let squish = [
@@ -33,7 +45,7 @@ let squish = [
         "instructions": [
             "Preheat oven to 350°. Line bottoms of 3 greased and floured 8-in. round baking pans with parchment; grease paper. In a large bowl, cream butter and sugar until light and fluffy, 5-7 minutes. Add eggs, 1 at a time, beating well after each addition. Combine flour, baking powder, salt and baking soda; add to the creamed mixture alternately with sour cream, beating well after each addition. Divide batter into equal portions, with 1-1/4 cups in 6 separate bowls. Tint each portion a different color with food coloring. Cover and refrigerate 3 portions.",
             "Transfer 3 remaining portions to prepared pans. Bake until edges begin to just brown, 13-15 minutes. Cool for 10 minutes before removing from pans to wire racks to cool completely. Cool, wash and dry pans. Repeat with remaining batter.",
-            "For frosting, in a large bowl, beat butter until fluffy. Gradually beat in confectioners' sugar. Beat in vanilla and enough cream to reach desired consistency. Spread frosting between layers and over top and side of cake. Decorate with sprinkles."               
+            "For frosting, in a large bowl, beat butter until fluffy. Gradually beat in confectioners' sugar. Beat in vanilla and enough cream to reach desired consistency. Spread frosting between layers and over top and side of cake. Decorate with sprinkles."
         ]
     },
     {
@@ -352,6 +364,48 @@ app.get("/api/squish", (req, res) => {
     res.send(squish);
 });
 
+app.get("/api/squish/featured", (req, res) => {
+    const featuredNames = [
+        "Lemon Pound Cake",
+        "Apple Pie",
+        "Frosted Red Velvet Cookies",
+        "Strawberry Shortcake"
+    ];
+    const featured = squish.filter(r => featuredNames.includes(r.name));
+    res.json(featured);
+});
+
+app.post("/api/squish", (req, res) => {
+    const isValidRecipe = validateRecipe(req.body);
+    if (isValidRecipe.error) {
+        console.log("Invalid recipe");
+        res.status(400).send(isValidRecipe.error.details[0].message);
+        return;
+    }
+    const recipe = {
+        _id: squish.length + 1,
+        name: req.body.name,
+        img_name: req.file ? `images/${req.file.filename}` : req.body.img_name,
+        description: req.body.description,
+        ingredients: req.body.ingredients.split("\n"),
+        instructions: req.body.instructions.split("\n")
+    }
+    squish.push(recipe);
+    res.status(200).send(recipe);
+});
+
+const validateHouse = (recipe) => {
+    const schema = Joi.object({
+        _id: Joi.allow(""),
+        name: Joi.string().min(3).required(),
+        img_name: Joi.allow(""),
+        description: Joi.allow(""),
+        ingredients: Joi.allow(""),
+        instructions: Joi.allow("")
+    });
+
+    return schema.validate(reipe);
+};
 
 app.listen(3002, () => {
     console.log("Server is running on port 3002");
