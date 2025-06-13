@@ -8,12 +8,8 @@ const multer = require("multer");
 const Joi = require("joi");
 
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "./public/images/");
-    },
-    filename: (req, file, cb) => {
-        cb(null, file.originalname);
-    },
+    destination: (req, file, cb) => { cb(null, "./public/images/"); },
+    filename: (req, file, cb) => { cb(null, file.originalname); },
 });
 
 const upload = multer({ storage: storage });
@@ -360,6 +356,17 @@ let squish = [
     }
 ]
 
+const validateRecipe = (recipe) => {
+    const schema = Joi.object({
+        name: Joi.string().min(3).required(),
+        description: Joi.string().min(3).required(),
+        ingredients: Joi.string().min(3).required(),
+        instructions: Joi.string().min(3).required()
+    });
+
+    return schema.validate(recipe);
+};
+
 app.get("/api/squish", (req, res) => {
     res.send(squish);
 });
@@ -375,7 +382,7 @@ app.get("/api/squish/featured", (req, res) => {
     res.json(featured);
 });
 
-app.post("/api/squish", (req, res) => {
+app.post("/api/squish", upload.single("img"), (req, res) => {
     const isValidRecipe = validateRecipe(req.body);
     if (isValidRecipe.error) {
         console.log("Invalid recipe");
@@ -394,18 +401,6 @@ app.post("/api/squish", (req, res) => {
     res.status(200).send(recipe);
 });
 
-const validateHouse = (recipe) => {
-    const schema = Joi.object({
-        _id: Joi.allow(""),
-        name: Joi.string().min(3).required(),
-        img_name: Joi.allow(""),
-        description: Joi.allow(""),
-        ingredients: Joi.allow(""),
-        instructions: Joi.allow("")
-    });
-
-    return schema.validate(reipe);
-};
 
 app.listen(3002, () => {
     console.log("Server is running on port 3002");
