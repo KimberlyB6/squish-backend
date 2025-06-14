@@ -401,7 +401,7 @@ app.post("/api/squish", upload.single("img"), (req, res) => {
     res.status(200).send(recipe);
 });
 
-
-app.listen(3002, () => {
-    console.log("Server is running on port 3002");
+const PORT = process.env.PORT || 3002;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
