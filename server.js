@@ -367,8 +367,25 @@ const validateRecipe = (recipe) => {
     return schema.validate(recipe);
 };
 
-app.get("/api/squish", (req, res) => {
-    res.send(squish);
+app.put("/api/squish/:id", upload.single("img"), (req, res) => {
+    const id = parseInt(req.params.id);
+    const index = squish.findIndex(r => r._id === id);
+    if (index === -1) return res.status(404).send("Recipe not found");
+
+    const result = validateRecipe(req.body);
+    if (result.error) return res.status(400).send(result.error.details[0].message);
+
+    const updatedRecipe = {
+        ...squish[index],
+        name: req.body.name,
+        description: req.body.description,
+        ingredients: req.body.ingredients.split("\n"),
+        instructions: req.body.instructions.split("\n"),
+        img_name: req.file ? `images/${req.file.filename}` : squish[index].img_name
+    };
+
+    squish[index] = updatedRecipe;
+    res.status(200).send(updatedRecipe);
 });
 
 app.get("/api/squish/featured", (req, res) => {
@@ -399,21 +416,6 @@ app.post("/api/squish", upload.single("img"), (req, res) => {
     }
     squish.push(recipe);
     res.status(200).send(recipe);
-});
-
-app.post("/api/squish/:id", upload.single("img"), (req, res) => {
-    //console.log(`You are trying to edit ${req.params.id}`);
-    //console.log(req.body)
-
-    const recipe = recipe.find((r) => r._id === parseInt (req.params.id));
-    console.log("The recipe " + recipe);
-
-    const isValidUpdate = validateRecipe(req.body);
-
-    if (isValidUpdate.error){
-        console.log("Invalid Info");
-        
-    }
 });
 
 const PORT = process.env.PORT || 3002;
