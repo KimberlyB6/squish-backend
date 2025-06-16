@@ -367,6 +367,16 @@ const validateRecipe = (recipe) => {
     return schema.validate(recipe);
 };
 
+app.delete("/api/squish/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const index = squish.findIndex(r => r._id === id);
+  if (index === -1) return res.status(404).send("Recipe not found");
+
+  squish.splice(index, 1);
+  res.status(200).send("Deleted");
+});
+
+
 app.put("/api/squish/:id", upload.single("img"), (req, res) => {
     const id = parseInt(req.params.id);
     const index = squish.findIndex(r => r._id === id);
