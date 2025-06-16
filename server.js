@@ -401,6 +401,21 @@ app.post("/api/squish", upload.single("img"), (req, res) => {
     res.status(200).send(recipe);
 });
 
+app.post("/api/squish/:id", upload.single("img"), (req, res) => {
+    //console.log(`You are trying to edit ${req.params.id}`);
+    //console.log(req.body)
+
+    const recipe = recipe.find((r) => r._id === parseInt (req.params.id));
+    console.log("The recipe " + recipe);
+
+    const isValidUpdate = validateRecipe(req.body);
+
+    if (isValidUpdate.error){
+        console.log("Invalid Info");
+        
+    }
+});
+
 const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
