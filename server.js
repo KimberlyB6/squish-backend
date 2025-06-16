@@ -398,6 +398,10 @@ app.put("/api/squish/:id", upload.single("img"), (req, res) => {
     res.status(200).send(updatedRecipe);
 });
 
+app.get("/api/squish", (req, res) => {
+  res.status(200).json(squish);
+});
+
 app.get("/api/squish/featured", (req, res) => {
     const featuredNames = [
         "Lemon Pound Cake",
@@ -408,6 +412,7 @@ app.get("/api/squish/featured", (req, res) => {
     const featured = squish.filter(r => featuredNames.includes(r.name));
     res.json(featured);
 });
+
 
 app.post("/api/squish", upload.single("img"), (req, res) => {
     const isValidRecipe = validateRecipe(req.body);
