@@ -8,7 +8,7 @@ const multer = require("multer");
 const Joi = require("joi");
 
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => { cb(null, "./public/images/"); },
+    destination: (req, file, cb) => { cb(null, "./public/images/desserts/"); },
     filename: (req, file, cb) => { cb(null, file.originalname); },
 });
 
@@ -367,16 +367,7 @@ const validateRecipe = (recipe) => {
     return schema.validate(recipe);
 };
 
-app.delete("/api/squish/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  const index = squish.findIndex(r => r._id === id);
-  if (index === -1) return res.status(404).send("Recipe not found");
-
-  squish.splice(index, 1);
-  res.status(200).send("Deleted");
-});
-
-
+//EDIT
 app.put("/api/squish/:id", upload.single("img"), (req, res) => {
     const id = parseInt(req.params.id);
     const index = squish.findIndex(r => r._id === id);
@@ -391,29 +382,27 @@ app.put("/api/squish/:id", upload.single("img"), (req, res) => {
         description: req.body.description,
         ingredients: req.body.ingredients.split("\n"),
         instructions: req.body.instructions.split("\n"),
-        img_name: req.file ? `images/${req.file.filename}` : squish[index].img_name
+        img_name: req.file ? `images/desserts/${req.file.filename}` : squish[index].img_name
     };
 
     squish[index] = updatedRecipe;
     res.status(200).send(updatedRecipe);
 });
 
-app.get("/api/squish", (req, res) => {
-  res.status(200).json(squish);
+//DELETE
+app.delete("/api/squish/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const index = squish.findIndex(r => r._id === id);
+
+  if (index === -1) {
+    return res.status(404).send("Recipe not found.");
+  }
+
+  squish.splice(index, 1);
+  res.status(200).send("Deleted successfully");
 });
 
-app.get("/api/squish/featured", (req, res) => {
-    const featuredNames = [
-        "Lemon Pound Cake",
-        "Apple Pie",
-        "Frosted Red Velvet Cookies",
-        "Strawberry Shortcake"
-    ];
-    const featured = squish.filter(r => featuredNames.includes(r.name));
-    res.json(featured);
-});
-
-
+//CREATE
 app.post("/api/squish", upload.single("img"), (req, res) => {
     const isValidRecipe = validateRecipe(req.body);
     if (isValidRecipe.error) {
@@ -424,13 +413,30 @@ app.post("/api/squish", upload.single("img"), (req, res) => {
     const recipe = {
         _id: squish.length + 1,
         name: req.body.name,
-        img_name: req.file ? `images/${req.file.filename}` : req.body.img_name,
+        img_name: req.file ? `images/desserts/${req.file.filename}` : req.body.img_name,
         description: req.body.description,
         ingredients: req.body.ingredients.split("\n"),
         instructions: req.body.instructions.split("\n")
     }
     squish.push(recipe);
     res.status(200).send(recipe);
+});
+
+//READ
+app.get("/api/squish", (req, res) => {
+  res.status(200).json(squish);
+});
+
+//READ
+app.get("/api/squish/featured", (req, res) => {
+    const featuredNames = [
+        "Lemon Pound Cake",
+        "Apple Pie",
+        "Frosted Red Velvet Cookies",
+        "Strawberry Shortcake"
+    ];
+    const featured = squish.filter(r => featuredNames.includes(r.name));
+    res.json(featured);
 });
 
 const PORT = process.env.PORT || 3002;
